@@ -4,10 +4,49 @@ colores = ["green", "red", "yellow", "blue"];
 
 secuencia = [];
 secuenciaUser=[];
-difficulty=500
-
+let difficulty=50
+let volume = 0.05; 
 $(".btn").click(handleClickButton);
 
+const volumeInput = document.getElementById("volumeInput");
+const volumeOnIcon = document.getElementById("volumeOn");
+const volumeOffIcon = document.getElementById("volumeOff");
+
+
+const difficultyInput = document.getElementById("difficultyInput");
+const difficultyValue = document.getElementById("difficultyValue");
+
+const getDifficultyWord = (value) => {
+    if (value == 5) return "Super Hardcore";
+    if (value >= 6 && value <= 305) return "Difícil";
+    if (value >= 306 && value <= 605) return "Relativamente Difícil";
+    if (value >= 606 && value <= 905) return "Moderado";
+    if (value >= 906 && value <= 1205) return "Fácil";
+    if (value >= 1206 && value <= 1500) return "Muy Fácil";
+    if (value === "1500") return "Extremadamente Fácil";
+    return value; 
+};
+
+
+volumeInput.addEventListener("input", function() {
+    const volumeValue = parseFloat(volumeInput.value);
+    volume = volumeValue
+    if (volumeValue === 0) {
+        volumeOnIcon.style.display = "none";  
+        volumeOffIcon.style.display = "inline"; 
+    } else {
+        volumeOnIcon.style.display = "inline"; 
+        volumeOffIcon.style.display = "none";  
+    }
+});
+
+difficultyInput.addEventListener("input", function() {
+    const invertedValue = difficultyInput.max - difficultyInput.value + parseInt(difficultyInput.min);
+    difficulty = invertedValue; // Invertir el valor para que los valores más altos sean más difíciles
+    difficultyValue.textContent = getDifficultyWord(difficulty);
+});
+
+difficultyValue.textContent = getDifficultyWord(difficultyInput.value);
 
 $(document).keydown(function (e) {
     if(playerAlive==false){
@@ -45,16 +84,16 @@ function handleSequence(secuencia) {
     secuenciaUser=[]
     indexOfColor = Math.floor(Math.random() * colores.length);
     secuencia.push(colores[indexOfColor]);
-   
+    let animationDuration = Math.max(difficulty, 50)
    
     setTimeout(function () {
         $("." + colores[indexOfColor]).addClass("pressed");
         playSound(colores[indexOfColor])
-    }, difficulty);
+    }, animationDuration);
     //$("." + colores[indexOfColor]).addClass("pressed");
     setTimeout(function () {
         $("." + colores[indexOfColor]).removeClass("pressed");
-    }, difficulty+250);
+    }, animationDuration+250);
 
     
     //console.log("Secuencia: " +secuencia)
@@ -137,39 +176,32 @@ function handleColorSelection(color){
 function handleTitle(text){
     $("#level-title").text(text);
 }
-
 function playSound(color) {
+    let sound;
     switch (color) {
         case "green":
-            let greenSound = new Audio("sounds/green.mp3");
-            greenSound.play();
-
+            sound = new Audio("sounds/green.mp3");
             break;
         case "blue":
-            let blueSound = new Audio("sounds/blue.mp3");
-            blueSound.play();
+            sound = new Audio("sounds/blue.mp3");
             break;
-
         case "red":
-            let redSound = new Audio("sounds/red.mp3");
-            redSound.play();
+            sound = new Audio("sounds/red.mp3");
             break;
-
         case "yellow":
-            let yellowSound = new Audio("sounds/yellow.mp3");
-            yellowSound.play();
+            sound = new Audio("sounds/yellow.mp3");
             break;
-
         case "wrong":
-            let wrongSound = new Audio("sounds/wrong.mp3");
-            wrongSound.volume=0.1
-            wrongSound.play();
+            sound = new Audio("sounds/wrong.mp3");
+            volume = Math.min(volume, 0.015);
             break;
-
         default:
-            break;
+            return;
     }
+    sound.volume = volume; 
+    sound.play();
 }
+
 
 function gameOver(){
     
